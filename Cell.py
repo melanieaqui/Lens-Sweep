@@ -36,9 +36,32 @@ class Cell:
          for cell in Cell.all:
              if cell.x == x and cell.y == y:
                  return cell
-            
     def show_cell(self):
-        print(self.get_cell_by_axis(0,0))
+         self.cell_btn_object.configure(text= self.count_mines_surrounded)  
+    
+    @property       
+    def surrounded_cells(self):
+        cells = [
+            self.get_cell_by_axis(self.x-1, self.y-1),
+            self.get_cell_by_axis(self.x-1, self.y),
+            self.get_cell_by_axis(self.x-1, self.y+1),
+            self.get_cell_by_axis(self.x, self.y-1),
+            self.get_cell_by_axis(self.x+1, self.y-1),
+            self.get_cell_by_axis(self.x+1, self.y),
+            self.get_cell_by_axis(self.x+1, self.y+1),
+            self.get_cell_by_axis(self.x, self.y+1)
+        ]
+        
+        cells = [cell for cell in cells if cell is not None]
+        return cells
+    
+    @property
+    def count_mines_surrounded(self):
+        count = 0
+        for cell in self.surrounded_cells:
+            if cell.is_mine:
+                count +=1
+        return count
     def show_mine(self):
         
         #change into bomb icon later
