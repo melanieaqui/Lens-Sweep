@@ -1,4 +1,4 @@
-from tkinter import*;
+from tkinter import*
 from Cell import Cell
 import settings
 
@@ -6,24 +6,24 @@ root = Tk()
 
 #background color
 root.configure(bg='black')
-root.geometry('1000x600')
+root.geometry('470x430')
 root.title("Sweeper Lens")
 root.resizable(False,False)
 top_frame=Frame(
     root, 
     bg='black',
-    width=1000,
+    width=100,
     height = 100)
 top_frame.place(x=0, y=0)
 
 game_frame = Frame(
     root,
     bg= 'white',
-    width =1000,
-    height = 560
+    width =500,
+    height = 500
 )
 
-game_frame.place(x=0, y= 100)
+game_frame.place(x=10, y= 10)
 
 for i in range (settings.GRID_SIZE):
     for j in range (settings.GRID_SIZE):
@@ -33,4 +33,5 @@ for i in range (settings.GRID_SIZE):
         
 Cell.randomize_mines()
 # run the window
+
 root.mainloop()
