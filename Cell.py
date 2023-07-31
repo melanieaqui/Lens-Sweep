@@ -69,7 +69,7 @@ class Cell:
                     ctypes.windll.user32.MessageBoxW(0, 'Congratulations! You won!', 'Game over', 0)
                     sys.exit()
         #unflagged when it was already a mine
-        elif self.is_flagged and self.is_mine:
+        elif not self.is_flagged and self.is_mine:
             Cell.unopened_mines+= 1
             self.cell_btn_object.configure(image=self.default)  # Remove flag display
         #unflag when not mine
