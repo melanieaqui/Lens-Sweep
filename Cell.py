@@ -3,17 +3,20 @@ import settings
 import random
 import ctypes
 import sys
-from functools import partial
+from PIL import Image,ImageTk
 
 
 class Cell:
-   # TEEMO_IMG = PhotoImage(file="Teemo_Mushroom_Trap_Render.png")
-
+     
     mines = [] #Class variable to store mine cells
     all = []
-    cell_count = 75
-    cell_mines = settings.MINES_COUNT
-    icon = None
+    
+    #number of mines that aew not mines
+    cell_count = (settings.GRID_SIZE**2)-settings.MINES_COUNT
+    
+    #number of mines
+    unopened_mines = settings.MINES_COUNT
+
     def __init__ (self,x,y,is_mine = False):
 
         self.is_mine = is_mine
@@ -21,18 +24,23 @@ class Cell:
         self.cell_btn_object = None
         self.x = x
         self.y = y
+        self.exposed = False
     
         Cell.all.append(self)
         
 
-    def create_btn_object (self, location):
+    def create_btn_object (self, location, default, teemo, ward,root):
         btn = Button(
             location,
-            width = 5,
-            height =2,
-           # image = icon
-
+            bg='#042028',
+            width = 40,
+            height = 40,
+            image=default
         )
+        self.teemo_img=teemo
+        self.ward_img=ward
+        self.default=default
+        self.root =root
         #left click
         btn.bind('<Button-1>',self.left_click)
         
@@ -40,37 +48,54 @@ class Cell:
         btn.bind('<Button-3>',self.right_click)
 
         self.cell_btn_object = btn
-        
+    
+    #right click functions, putting the flag     
     def right_click(self,e):
         
-        self.is_flagged = not self.is_flagged  # Toggle the is_flagged attribute
+        #check if cell has already been exposed or open, i.e there is a number display
+        if self.exposed == False:
+            self.is_flagged = not self.is_flagged 
 
-        if self.is_flagged:
-            self.cell_btn_object.configure(image=PhotoImage(file="Teemo_Mushroom_Trap_Render.png")) 
-            self.cell_btn_object.image(file="Teemo_Mushroom_Trap_Render.png") # Display "F" for flagged cell
+        if self.is_flagged and self.exposed == False:
+            self.cell_btn_object.config(image=self.ward_img)
+
             if self.is_mine:
-                #self.show_cell()
-                Cell.cell_mines-= 1
-                print(Cell.cell_mines)
-                if Cell.cell_mines == 0:
+                Cell.unopened_mines-= 1
+                print(Cell.unopened_mines)
+                #check if all mine has been flagged
+                
+                if Cell.unopened_mines == 0:
+                    self.root.update()
                     ctypes.windll.user32.MessageBoxW(0, 'Congratulations! You won!', 'Game over', 0)
-        else:
-            self.cell_btn_object.configure(text="")  # Remove flag display
-        print(e)
-        
+                    sys.exit()
+        #unflagged when it was already a mine
+        elif self.is_flagged and self.is_mine:
+            Cell.unopened_mines+= 1
+            self.cell_btn_object.configure(image=self.default)  # Remove flag display
+        #unflag when not mine
+        elif  self.exposed == False:
+            self.cell_btn_object.configure(image=self.default)
+    
+    
     def left_click(self,e):
         #if cell is not flagged
         if not self.is_flagged:
+            #not flagged but mine
             if self.is_mine:
-                self.show_mine()
-               # ctypes.windll.user32.MessageBoxW(0, 'You clicked on a mine! You lose.', 'Game Over!', 0)
-               # sys.exit()
+                self.show_mine()   
+                self.root.update()        
+                ctypes.windll.user32.MessageBoxW(0, 'You clicked on a mine! You lose.', 'Game Over!', 0) 
+                sys.exit()
+            #not flagged but no more non mines
             else:
                 self.show_cell()
                 Cell.cell_count -= 1
                 if Cell.cell_count == 0:
+                    self.root.update()
                     ctypes.windll.user32.MessageBoxW(0, 'Congratulations! You won!', 'Game over', 0)
-        
+                    sys.exit()
+
+        #flagged
         else:
             ctypes.windll.user32.MessageBoxW(0, 'That cell is warded!', 'Choose another cell', 0)
             return self
@@ -82,7 +107,17 @@ class Cell:
                  return cell
                 
     def show_cell(self):
-         self.cell_btn_object.configure(text= self.count_mines_surrounded)  
+        self.exposed=True
+        self.cell_btn_object.config(image= "",
+            text= self.count_mines_surrounded, 
+            height=2,
+            width=5,
+            bg='#BE5A04',
+            state = DISABLED,
+            disabledforeground='black',
+            relief=FLAT
+            
+        )  
     
     @property       
     def surrounded_cells(self):
@@ -108,18 +143,16 @@ class Cell:
                 count +=1
         return count
     def show_mine(self):
-        icon = PhotoImage(file="Teemo_Mushroom_Trap_Render.png")
-        #change into bomb icon later
-        self.cell_btn_object.configure(text=icon)
-        self.cell_btn_object.configure
-        Cell.cell_mines -=1
+        self.cell_btn_object.config(bg='#BE5A04',
+            image=self.teemo_img, 
+            relief=FLAT)
+        Cell.unopened_mines -=1
         #Reveal all the mines
-        if Cell.cell_mines >=1:
+        if Cell.unopened_mines >=1:
             for mine in Cell.mines:
-            #if mine is not flagged
-                if not mine.is_flagged: #Only reveal unflagged mines
-                    mine.show_mine()
-
+                #if mine is not flagged
+                    if not mine.is_flagged: #Only reveal unflagged mines                   
+                        mine.show_mine()
     
         
     @staticmethod
@@ -134,6 +167,5 @@ class Cell:
             
     def __repr__(self):
         return f"cell({self.x},{self.y})"
-    
     
 

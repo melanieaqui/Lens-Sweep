@@ -1,0 +1,5 @@
+Teemo mushroom image: https://leagueoflegends.fandom.com/wiki/Teemo/LoL 
+warded image: https://leagueoflegends.fandom.com/wiki/Ward
+LoL icon image: https://commons.wikimedia.org/wiki/File:LoL_icon.svg 
+Color palette: https://color.adobe.com/League-of-Legends-color-theme-7881883/ 
+Video Tutorial: https://www.youtube.com/watch?v=OqbGRZx4xUc&t=2111s&ab_channel=freeCodeCamp.org 
