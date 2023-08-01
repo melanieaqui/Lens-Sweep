@@ -1,8 +1,10 @@
+
 from tkinter import *
 import settings
 import random
 import ctypes
 import sys
+import os
 from PIL import Image,ImageTk
 
 
@@ -11,7 +13,7 @@ class Cell:
     mines = [] #Class variable to store mine cells
     all = []
     
-    #number of mines that aew not mines
+    #number of mines that are not mines
     cell_count = (settings.GRID_SIZE**2)-settings.MINES_COUNT
     
     #number of mines
@@ -61,13 +63,25 @@ class Cell:
 
             if self.is_mine:
                 Cell.unopened_mines-= 1
-                print(Cell.unopened_mines)
+                
+                #print(Cell.unopened_mines) for debug purposes how many mines not yet flagged
+                
                 #check if all mine has been flagged
                 
                 if Cell.unopened_mines == 0:
                     self.root.update()
                     ctypes.windll.user32.MessageBoxW(0, 'Congratulations! You won!', 'Game over', 0)
-                    sys.exit()
+                    # To restart the game
+                    resgame = ctypes.windll.user32.MessageBoxW(0, 'Do you want to play again?', 'You Won!', 1)
+                    if resgame == 1:
+                    
+                        os.startfile("main.py")
+                        sys.exit()
+                    
+                    else :
+                        sys.exit()
+                    
+                    
         #unflagged when it was already a mine
         elif not self.is_flagged and self.is_mine:
             Cell.unopened_mines+= 1
@@ -85,15 +99,36 @@ class Cell:
                 self.show_mine()   
                 self.root.update()        
                 ctypes.windll.user32.MessageBoxW(0, 'You clicked on a mine! You lose.', 'Game Over!', 0) 
-                sys.exit()
-            #not flagged but no more non mines
-            else:
+                
+                # To restart the game
+                resgame = ctypes.windll.user32.MessageBoxW(0, 'Do you want to play again?', 'You Lose!', 1)
+                if resgame == 1:
+                    
+                    os.startfile("main.py")
+                    sys.exit()
+                    
+                else :
+                    sys.exit()
+                             
+                
+            elif not self.exposed:
                 self.show_cell()
                 Cell.cell_count -= 1
                 if Cell.cell_count == 0:
                     self.root.update()
+                    #not flagged but no more non mines
+
                     ctypes.windll.user32.MessageBoxW(0, 'Congratulations! You won!', 'Game over', 0)
-                    sys.exit()
+                    # To restart the game
+                    resgame = ctypes.windll.user32.MessageBoxW(0, 'Do you want to play again?', 'You Lose!', 1)
+                    if resgame == 1:
+                    
+                        os.startfile("main.py")
+                        sys.exit()
+                    
+                    else :
+                        sys.exit()
+                    
 
         #flagged
         else:
@@ -168,4 +203,3 @@ class Cell:
     def __repr__(self):
         return f"cell({self.x},{self.y})"
     
-
